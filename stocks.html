@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Emiten — EquityLens</title>
+    <meta name="description"
+        content="Daftar lengkap semua emiten yang terdaftar di Bursa Efek Indonesia beserta data kepemilikan.">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container navbar-inner">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🔍</div>
+                <span>StockInfo</span>
+            </a>
+            <div class="nav-search">
+                <span class="nav-search-icon">🔍</span>
+                <input type="text" id="navSearch" placeholder="Cari saham atau pemegang…" autocomplete="off">
+                <div class="search-results" id="navSearchResults"></div>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- STOCKS TABLE -->
+    <main class="container" style="padding: 28px 0 80px;">
+
+        <nav class="breadcrumb" style="margin-bottom:20px;">
+            <a href="index.html">🏠 Beranda</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Semua Emiten</span>
+        </nav>
+
+        <!-- Stats cards -->
+        <div class="stats-grid fade-up" style="margin-bottom:24px;">
+            <div class="stat-card">
+                <div class="stat-icon blue">📈</div>
+                <div class="stat-value text-blue" id="statStocks">…</div>
+                <div class="stat-label">Total Emiten</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">👥</div>
+                <div class="stat-value" style="color:var(--accent-purple)" id="statHolders">…</div>
+                <div class="stat-label">Total Pemegang Saham</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">💰</div>
+                <div class="stat-value text-green" id="statMarketCap">…</div>
+                <div class="stat-label">Total Kapitalisasi Pasar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">🔗</div>
+                <div class="stat-value" style="color:var(--accent-orange)" id="statRecords">…</div>
+                <div class="stat-label">Catatan Kepemilikan</div>
+            </div>
+        </div>
+
+        <div class="card fade-up delay-1" id="stocksCard">
+            <div class="card-header">
+                <div class="section-header" style="margin-bottom:0">
+                    <span class="section-title">📊 Daftar Emiten</span>
+                    <span class="section-subtitle" id="stockCountLabel">Memuat…</span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table" id="stocksTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th data-sort="ticker" data-type="string">Kode <span class="sort-icon">⇅</span></th>
+                            <th data-sort="company" data-type="string">Nama Perusahaan <span class="sort-icon">⇅</span>
+                            </th>
+                            <th>Sektor</th>
+                            <th data-sort="price" data-type="number" class="text-right">Harga <span
+                                    class="sort-icon">⇅</span></th>
+                            <th data-sort="mcap" data-type="number" class="text-right">Market Cap <span
+                                    class="sort-icon">⇅</span></th>
+                            <th class="text-center">Pemegang</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="stocksTbody">
+                        <tr>
+                            <td colspan="8" class="text-center text-muted" style="padding:48px;">
+                                <div class="skeleton" style="height:16px;margin-bottom:8px;"></div>
+                                <div class="skeleton" style="height:16px;width:60%;margin:0 auto;"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        © 2025 EquityLens — Data Transparansi Saham Publik Indonesia. Untuk keperluan edukasi.
+    </footer>
+
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script>
+        let allStocks = [];
+
+        async function loadStocks() {
+            try {
+                const res = await fetch('api/dashboard.php');
+                const data = await res.json();
+                allStocks = data.all_stocks || [];
+
+                // Populate stats
+                if (data.stats) {
+                    document.getElementById('statStocks').textContent = data.stats.total_stocks;
+                    document.getElementById('statHolders').textContent = data.stats.total_holders;
+                    document.getElementById('statMarketCap').textContent = formatIDR(data.stats.total_market_cap);
+                    document.getElementById('statRecords').textContent = data.stats.total_records;
+                }
+
+                document.getElementById('stockCountLabel').textContent = `${allStocks.length} emiten`;
+                renderTable(allStocks);
+                makeSortable('stocksTable');
+            } catch (err) {
+                console.error('Error loading stocks:', err);
+            }
+        }
+
+        function renderTable(stocks) {
+            const tbody = document.getElementById('stocksTbody');
+            if (!stocks.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:48px;">Tidak ada data ditemukan.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = stocks.map((s, i) => `
+                <tr>
+                    <td class="text-muted">${i + 1}</td>
+                    <td data-col="ticker" data-raw="${s.ticker}">
+                        <a href="stock.html?ticker=${s.ticker}" class="ticker-badge">${s.ticker}</a>
+                    </td>
+                    <td data-col="company" data-raw="${s.company_name}" style="font-weight:500;">
+                        <a href="stock.html?ticker=${s.ticker}" style="color:var(--text-primary);">${escHtml(s.company_name)}</a>
+                    </td>
+                    <td><span class="sector-tag">${escHtml(s.sector)}</span></td>
+                    <td class="text-right font-mono" data-col="price" data-raw="${s.current_price}">
+                        Rp ${Number(s.current_price).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td class="text-right fw-700 text-green" data-col="mcap" data-raw="${s.market_cap}">
+                        ${formatIDR(s.market_cap)}
+                    </td>
+                    <td class="text-center">
+                        <span class="type-badge institution">${s.holder_count}</span>
+                    </td>
+                    <td>
+                        <a href="stock.html?ticker=${s.ticker}" style="color:var(--accent-blue);font-size:0.82rem;">Lihat →</a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable(query) {
+            const q = query.toLowerCase();
+            const filtered = allStocks.filter(s =>
+                s.ticker.toLowerCase().includes(q) ||
+                s.company_name.toLowerCase().includes(q) ||
+                (s.sector || '').toLowerCase().includes(q)
+            );
+            document.getElementById('stockCountLabel').textContent = `${filtered.length} dari ${allStocks.length} emiten`;
+            renderTable(filtered);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadStocks);
+    </script>
+</body>
+
+</html>

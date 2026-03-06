@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockInfo — Transparansi Kepemilikan Saham</title>
+    <meta name="description" content="Platform transparansi kepemilikan saham publik Indonesia.">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <style>
+        /* Lock to one screen, no scroll */
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .home-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Hero fills remaining space */
+        .home-hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px 32px;
+            background: var(--gradient-hero);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle green glow blobs */
+        .home-hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(63, 185, 80, 0.08) 0%, transparent 65%);
+            top: -100px;
+            left: -100px;
+            pointer-events: none;
+        }
+
+        .home-hero::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(86, 211, 100, 0.06) 0%, transparent 65%);
+            bottom: -80px;
+            right: 80px;
+            pointer-events: none;
+        }
+
+        .home-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(63, 185, 80, 0.12);
+            border: 1px solid rgba(63, 185, 80, 0.25);
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent-green);
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        .home-h1 {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: 14px;
+        }
+
+        .home-sub {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        /* Search */
+        .home-search-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .home-search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-lg);
+            padding: 12px 12px 12px 20px;
+            backdrop-filter: blur(20px);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .home-search-bar:focus-within {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.15), var(--shadow-glow);
+        }
+
+        .home-search-bar input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .home-search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .home-search-bar .search-btn {
+            padding: 10px 24px;
+            background: var(--gradient-accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity var(--transition), transform var(--transition);
+            white-space: nowrap;
+        }
+
+        .home-search-bar .search-btn:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .search-results {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            display: none;
+            z-index: 200;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        /* Chips */
+        .home-chips {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .home-chips .chip {
+            padding: 4px 14px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .home-chips .chip:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: rgba(63, 185, 80, 0.08);
+        }
+
+        /* Browse CTA */
+        .home-cta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 32px;
+            background: var(--gradient-accent);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+            box-shadow: 0 4px 20px rgba(63, 185, 80, 0.3);
+        }
+
+        .home-cta-link:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(63, 185, 80, 0.4);
+        }
+
+        .home-cta-link .arrow {
+            transition: transform var(--transition);
+        }
+
+        .home-cta-link:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        /* ---- Feature cards ---- */
+        .home-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .feat-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(20px);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.06), transparent);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .feat-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: 0 4px 20px rgba(63, 185, 80, 0.18);
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .feat-card:hover::before {
+            opacity: 1;
+        }
+
+        .feat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(63, 185, 80, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .feat-text {
+            flex: 1;
+        }
+
+        .feat-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .feat-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .feat-arrow {
+            color: var(--accent-green);
+            font-size: 1rem;
+            transition: transform var(--transition);
+        }
+
+        .feat-card:hover .feat-arrow {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="home-wrap">
+
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="container navbar-inner">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>StockInfo</span>
+                </a>
+                <div class="nav-actions">
+                    <a href="stocks.html" class="nav-stocks-btn">📊 Semua Emiten</a>
+                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">🌙</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- HERO — fills 100vh minus navbar -->
+        <section class="home-hero">
+            <div class="home-content">
+
+                <div class="hero-badge">📊 Bursa Efek Indonesia · Real-time</div>
+
+                <h1 class="home-h1">
+                    Transparansi Kepemilikan<br>
+                    <span class="gradient-text">Saham Publik Indonesia</span>
+                </h1>
+
+                <p class="home-sub">
+                    Telusuri kaitan antara emiten dan pemegang saham secara dua arah.<br>
+                    Cari kode saham atau nama pemilik untuk melihat data kepemilikan.
+                </p>
+
+                <!-- Search bar -->
+                <div class="home-search-wrap">
+                    <div class="home-search-bar">
+                        <span>🔍</span>
+                        <input type="text" id="heroSearch" placeholder="Cari kode saham (BBCA) atau nama pemilik…"
+                            autocomplete="off">
+                        <button class="search-btn" onclick="triggerSearch()">Cari Sekarang</button>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+
+                <!-- Hint chips -->
+                <div class="home-chips">
+                    <span>Coba:</span>
+                    <button class="chip" onclick="fillSearch('BBCA')">BBCA</button>
+                    <button class="chip" onclick="fillSearch('TLKM')">TLKM</button>
+                    <button class="chip" onclick="fillSearch('BlackRock')">BlackRock</button>
+                    <button class="chip" onclick="fillSearch('Robert Budi')">Robert Budi Hartono</button>
+                </div>
+
+
+            </div>
+        </section>
+
+    </div><!-- .home-wrap -->
+
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script>
+        function triggerSearch() {
+            const q = document.getElementById('heroSearch').value.trim();
+            if (q) doSearch(q, null, document.getElementById('searchResults'), true);
+        }
+        document.getElementById('heroSearch')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') triggerSearch();
+        });
+    </script>
+</body>
+
+</html>

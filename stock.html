@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saham | StockInfo</title>
+    <meta name="description"
+        content="Profil saham lengkap dengan daftar pemegang saham, Market Cap, Free Float, dan komposisi kepemilikan.">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container navbar-inner">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🔍</div>
+                <span>StockInfo</span>
+            </a>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="container" style="padding:64px 24px;text-align:center;color:var(--text-muted);">
+        <div style="font-size:2rem;margin-bottom:12px;">⏳</div>
+        <p>Memuat data saham…</p>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div id="errorState" class="container" style="padding:64px 24px;text-align:center;display:none;">
+        <div style="font-size:3rem;margin-bottom:12px;">⚠️</div>
+        <h3 style="margin-bottom:8px;">Saham Tidak Ditemukan</h3>
+        <p class="error-msg text-muted" style="margin-bottom:24px;">Kode saham tidak valid.</p>
+        <a href="index.html" style="color:var(--accent-blue);">← Kembali ke Beranda</a>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div id="pageContent" class="container page-content" style="display:none;">
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb fade-up">
+            <a href="index.html">🏠 Beranda</a>
+            <span class="breadcrumb-sep">›</span>
+            <span>Saham</span>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current" id="bcTicker">—</span>
+        </nav>
+
+        <!-- Profile Header -->
+        <div class="profile-header card fade-up delay-1">
+            <div class="profile-avatar" id="avatarText">—</div>
+            <div class="profile-meta">
+                <div class="profile-ticker" id="profileTicker">—</div>
+                <div class="profile-name" id="profileName">—</div>
+                <div class="profile-detail">
+                    <span class="profile-detail-item">🏭 <span id="profileSector">—</span></span>
+                    <span class="profile-detail-item">📅 IPO: <span id="profileListing">—</span></span>
+                    <span class="profile-detail-item">👥 <span id="profileOwnerCount">—</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid fade-up delay-2">
+            <div class="kpi-card">
+                <div class="kpi-label">💰 Market Capitalization</div>
+                <div class="kpi-value green" id="kpiMarketCap">—</div>
+                <div class="kpi-sub">Total Shares × Harga Saat Ini</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">💱 Harga Saham</div>
+                <div class="kpi-value blue" id="kpiPrice">—</div>
+                <div class="kpi-sub">Per lembar (IDR)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">🌊 Free Float</div>
+                <div class="kpi-value orange" id="kpiFreeFloat">—</div>
+                <div class="kpi-sub">Saham di tangan publik</div>
+                <div class="ownership-bar-wrap">
+                    <div class="ownership-bar-labels">
+                        <span id="freeFloatPctLabel">—</span>
+                        <span id="controllingPctLabel">—</span>
+                    </div>
+                    <div class="ownership-bar">
+                        <div class="ownership-bar-fill" id="freeFloatBar" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">📊 Total Saham Beredar</div>
+                <div class="kpi-value" id="kpiTotalShares">—</div>
+                <div class="kpi-sub">Pengendali: <span id="kpiControlling">—</span></div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-section fade-up delay-3">
+            <!-- Donut Chart -->
+            <div class="chart-card">
+                <div class="section-header" style="margin-bottom:20px;">
+                    <span class="section-title">🍩 Komposisi Kepemilikan</span>
+                    <span class="section-subtitle">Top 10 pemilik</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="ownershipChart"></canvas>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+
+            <!-- Quick Info -->
+            <div class="chart-card" style="display:flex;flex-direction:column;justify-content:space-between;">
+                <div>
+                    <div class="section-title" style="margin-bottom:16px;">ℹ️ Tentang Saham Ini</div>
+                    <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.7;">
+                        Halaman ini menampilkan informasi keterbukaan kepemilikan saham secara transparan.
+                        Data mencakup seluruh pemegang saham yang tercatat, nilai kepemilikan, persentase,
+                        serta klasifikasi pengendali dan non-pengendali.
+                    </p>
+                </div>
+                <div style="margin-top:24px;">
+                    <div class="kpi-label" style="margin-bottom:12px;">🔗 Navigasi Cepat</div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <a href="index.html" style="font-size:0.875rem;color:var(--accent-blue);">← Kembali ke Daftar
+                            Saham</a>
+                        <span style="font-size:0.78rem;color:var(--text-muted);">Klik nama pemegang saham untuk melihat
+                            portofolio lengkap mereka.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Owners Table -->
+        <div class="card fade-up delay-4">
+            <div class="card-header">
+                <div class="section-header" style="margin-bottom:0;">
+                    <span class="section-title">👥 Daftar Pemegang Saham</span>
+                    <span class="section-subtitle">Klik kolom untuk mengurutkan</span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table" id="ownersTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Pemegang</th>
+                            <th>Tipe Investor</th>
+                            <th>Domisili</th>
+                            <th data-sort="shares" data-type="number" class="text-right">Lembar Saham <span
+                                    class="sort-icon">⇅</span></th>
+                            <th data-sort="pct" data-type="number" class="text-right">Kepemilikan % <span
+                                    class="sort-icon">⇅</span></th>
+                            <th data-sort="value" data-type="number" class="text-right">Nilai Kepemilikan <span
+                                    class="sort-icon">⇅</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="ownersTbody">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted" style="padding:32px;">Memuat data…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- end #pageContent -->
+
+    <footer class="footer">
+        © 2025 StockInfo — Data Transparansi Saham Publik Indonesia.
+    </footer>
+
+    <script src="assets/js/charts.js?v=2"></script>
+    <script src="assets/js/app.js?v=2"></script>
+    <script src="assets/js/stock.js?v=2"></script>
+</body>
+
+</html>

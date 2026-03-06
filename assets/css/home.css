@@ -1,0 +1,270 @@
+/* ============================================================
+   StockInfo — Home Page Specific Styles
+   ============================================================ */
+
+/* Remove default page padding on home page */
+.home-page {
+    overflow: hidden;
+}
+
+/* Navbar quick-access button */
+.nav-stocks-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--gradient-accent);
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: opacity var(--transition), transform var(--transition);
+    white-space: nowrap;
+}
+
+.nav-stocks-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   Full-screen two-column hero
+   ============================================================ */
+.home-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    min-height: calc(100vh - 64px);
+    /* fill screen below navbar */
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    gap: 48px;
+}
+
+/* ============================================================
+   Left side
+   ============================================================ */
+.home-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.home-h1 {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 16px 0 16px;
+}
+
+.home-sub {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+    margin-bottom: 28px;
+}
+
+.home-search {
+    max-width: 520px;
+}
+
+/* CTA Button */
+.home-browse-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 14px 28px;
+    background: transparent;
+    border: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all var(--transition);
+    max-width: fit-content;
+    position: relative;
+    overflow: hidden;
+}
+
+.home-browse-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-blue);
+    opacity: 0;
+    transition: opacity var(--transition);
+    z-index: 0;
+}
+
+.home-browse-btn:hover {
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(88, 166, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.home-browse-btn:hover::before {
+    opacity: 1;
+}
+
+.home-browse-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+.browse-arrow {
+    font-size: 1.1rem;
+    transition: transform var(--transition);
+}
+
+.home-browse-btn:hover .browse-arrow {
+    transform: translateX(4px);
+}
+
+/* ============================================================
+   Right side — Stats cards
+   ============================================================ */
+.home-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(88, 166, 255, 0.12), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.home-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.home-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    backdrop-filter: blur(20px);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.home-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gradient-accent);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.home-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    border-color: var(--border-hover);
+}
+
+.home-stat-card:hover::before {
+    opacity: 1;
+}
+
+.home-stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-stat-icon.blue {
+    background: rgba(88, 166, 255, 0.12);
+}
+
+.home-stat-icon.purple {
+    background: rgba(188, 140, 255, 0.12);
+}
+
+.home-stat-icon.green {
+    background: rgba(63, 185, 80, 0.12);
+}
+
+.home-stat-icon.orange {
+    background: rgba(240, 136, 62, 0.12);
+}
+
+.home-stat-val {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.home-stat-val.blue {
+    color: var(--accent-blue);
+}
+
+.home-stat-val.purple {
+    color: var(--accent-purple);
+}
+
+.home-stat-val.green {
+    color: var(--accent-green);
+}
+
+.home-stat-val.orange {
+    color: var(--accent-orange);
+}
+
+.home-stat-lbl {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 900px) {
+    .home-hero {
+        grid-template-columns: 1fr;
+        padding: 32px 24px;
+        min-height: auto;
+        gap: 32px;
+    }
+
+    .home-page {
+        overflow: auto;
+    }
+
+    .home-h1 {
+        font-size: 2rem;
+    }
+
+    .nav-stocks-btn {
+        display: none;
+    }
+}
